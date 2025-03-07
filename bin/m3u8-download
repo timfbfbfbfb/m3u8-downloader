@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+if [[ "$#" -lt 2 ]]; then
+  >&2 echo "Usage:
+    m3u8-download <m3u8 url> <output file>
+"
+    exit 1
+fi
+
+exe="$(dirname "${BASH_SOURCE[0]}")/.."/m3u8-downloader
+rand_str="$(cat /dev/urandom | head -c 32 | xxd -p | tr -d '\n')"
+out_dir=/tmp/"$rand_str"
+
+"$exe" -u "$1" -o "$out_dir"
+ffmpeg -i "$out_dir/main.ts" -c:v copy -c:a copy "$2"
+rm -rf "$out_dir"
+
